@@ -14,9 +14,11 @@ class App extends Component {
         this.state = {
             data: [
                 { name: "John C.", salary: 800, increase: true, rise: true, id: 1 },
-                { name: "Alex B.", salary: 3000, increase: false, rise: false, id: 2 },
+                { name: "Alex B.", salary: 3000, increase: false, rise: true, id: 2 },
                 { name: "Stiv S.", salary: 4000, increase: false, rise: false, id: 3 }
-            ]
+            ],
+            term: '',
+            filter: 'all'
         }
         this.maxId = 4;
     }
@@ -61,10 +63,10 @@ class App extends Component {
         //     }
         //     })
         //     или используя функцию map =>
-        this.setState(({data}) => ({
+        this.setState(({ data }) => ({
             data: data.map(item => {
                 if (item.id === id) {
-                    return {...item, [prop]: !item[prop]}
+                    return { ...item, [prop]: !item[prop] }
                 }
                 return item;
             })
@@ -83,24 +85,57 @@ class App extends Component {
 
     // } можно избавиться от повторения путем переработки предыдущего метода
 
+    searchEmp = (items, term) => {
+        if (term.length === 0) return items;
+        return items.filter(item => {
+            return item.name.indexOf(term) > -1
+        })
+    }
+
+    onUpdateSearch = (term) => {
+        this.setState({ term: term })
+    }
+
+    filterPost = (items, filter) => {
+        switch (filter) {
+            case 'rise': 
+                return items.filter(item => item.rise ===true)
+            case 'moreThan1000':
+                return items.filter(item => item.salary > 1000)
+            default: return items
+        }
+    }
+
+    onFilterSelect = (filter) => {
+        this.setState({filter: filter})
+    }
+
+    onChangeSalary = () =>{
+            console.log('dfs')
+            // console.log(e.target.value)
+    }
+
     render() {
-        const increased = this.state.data.filter(item => item.increase === true).length
+        const { data, term, filter } = this.state;
+        const increased = data.filter(item => item.increase === true).length;
+        const visibleData = this.filterPost(this.searchEmp(data, term), filter);
         return (
             <div className='app'>
-                <AppInfo    numberOfEmployees = {this.state.data.length}
-                            bonus = {increased}/>
+                <AppInfo numberOfEmployees={data.length}
+                    bonus={increased} />
                 <div className="search-panel">
-                    <SearchPanel />
-                    <AppFilter />
+                    <SearchPanel onUpdateSearch={this.onUpdateSearch} />
+                    <AppFilter filter = {filter} onFilterSelect = {this.onFilterSelect}/>
                 </div>
 
                 <EmployeesList
-                    data={this.state.data}
+                    data={visibleData}
                     onDelete={this.deletItem}
-                    onToggleProp={this.onToggleProp}/>
+                    onToggleProp={this.onToggleProp}
+                    onChangeValue={this.onChangeSalary} />
                 <EmployeesAddForm
                     onAdd={this.addItem}
-                    data={this.state.data} />
+                    data={data} />
             </div>
         );
     }
