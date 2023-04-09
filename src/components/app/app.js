@@ -98,8 +98,8 @@ class App extends Component {
 
     filterPost = (items, filter) => {
         switch (filter) {
-            case 'rise': 
-                return items.filter(item => item.rise ===true)
+            case 'rise':
+                return items.filter(item => item.rise === true)
             case 'moreThan1000':
                 return items.filter(item => item.salary > 1000)
             default: return items
@@ -107,13 +107,21 @@ class App extends Component {
     }
 
     onFilterSelect = (filter) => {
-        this.setState({filter: filter})
+        this.setState({ filter: filter })
     }
 
-    onChangeSalary = () =>{
-            console.log('dfs')
-            // console.log(e.target.value)
+    onChangeValue = (newSalary, id) => {
+        this.setState(({ data }) => ({
+            data: data.map(item => {
+                if (item.id === id) {
+                    return { ...item, salary: newSalary}
+                }
+                return item;
+            })
+        }))
     }
+
+
 
     render() {
         const { data, term, filter } = this.state;
@@ -125,14 +133,14 @@ class App extends Component {
                     bonus={increased} />
                 <div className="search-panel">
                     <SearchPanel onUpdateSearch={this.onUpdateSearch} />
-                    <AppFilter filter = {filter} onFilterSelect = {this.onFilterSelect}/>
+                    <AppFilter filter={filter} onFilterSelect={this.onFilterSelect} />
                 </div>
 
                 <EmployeesList
                     data={visibleData}
                     onDelete={this.deletItem}
                     onToggleProp={this.onToggleProp}
-                    onChangeValue={this.onChangeSalary} />
+                    onChangeValue={this.onChangeValue} />
                 <EmployeesAddForm
                     onAdd={this.addItem}
                     data={data} />
